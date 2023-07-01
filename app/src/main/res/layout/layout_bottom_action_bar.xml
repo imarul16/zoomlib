@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/action_bar"
+    android:id="@+id/mera_layout"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:layout_gravity="right|center_vertical"
@@ -9,6 +9,7 @@
     android:scrollbars="none"
     android:visibility="invisible">
 
+    <!--action_bar-->
     <ScrollView
         android:id="@+id/action_bar_scroll"
         android:layout_width="wrap_content"
@@ -37,6 +38,7 @@
                 android:layout_width="@dimen/dp_68"
                 android:layout_height="@dimen/dp_68"
                 android:layout_marginTop="14dp"
+                android:visibility="visible"
                 android:onClick="onClickShare"
                 android:src="@drawable/icon_share" />
 
@@ -49,13 +51,28 @@
                 android:src="@drawable/icon_video_off" />
 
             <ImageView
+                android:id="@+id/icon_screenshot"
+                android:layout_width="@dimen/dp_68"
+                android:layout_height="@dimen/dp_68"
+                android:layout_marginTop="14dp"
+                android:visibility="visible"
+                android:src="@drawable/baseline_image_24" />
+
+            <ImageView
                 android:id="@+id/icon_more"
                 android:layout_width="@dimen/dp_68"
                 android:layout_height="@dimen/dp_68"
                 android:layout_marginTop="14dp"
                 android:onClick="onClickMore"
-                android:visibility="gone"
+                android:visibility="visible"
                 android:src="@drawable/icon_more" />
+
+            <ImageView
+                android:id="@+id/ivSwitchCamera"
+                android:layout_width="@dimen/dp_68"
+                android:layout_height="@dimen/dp_68"
+                android:layout_marginTop="14dp"
+                android:src="@drawable/icon_switchcamera" />
 
 
         </LinearLayout>

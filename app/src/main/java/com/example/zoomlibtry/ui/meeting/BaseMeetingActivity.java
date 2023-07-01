@@ -1,12 +1,16 @@
 package com.example.zoomlibtry.ui.meeting;
 
 
+import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.Dialog;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
@@ -20,23 +24,27 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Display;
 import android.view.Gravity;
+import android.view.PixelCopy;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.zoomlibtry.CartEvent;
+import com.example.zoomlibtry.MeetingActivity;
 import com.example.zoomlibtry.R;
 import com.example.zoomlibtry.cmd.CmdHandler;
 import com.example.zoomlibtry.cmd.CmdHelper;
@@ -56,8 +64,11 @@ import com.example.zoomlibtry.ui.meeting.util.ZMAdapterOsBugHelper;
 import com.example.zoomlibtry.ui.meeting.view.ChatMsgAdapter;
 import com.example.zoomlibtry.ui.meeting.view.KeyBoardLayout;
 import com.example.zoomlibtry.ui.meeting.view.UserVideoAdapter;
+import com.example.zoomlibtry.utils.ActivityConstants;
 import com.example.zoomlibtry.utils.ToastHelper;
 import com.example.zoomlibtry.utils.UserHelper;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -246,9 +257,12 @@ public class BaseMeetingActivity extends AppCompatActivity implements ZoomVideoS
         }
     };
 
+    boolean isVisitFirstTime = false;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        isVisitFirstTime = true;
         if (!renderWithSurfaceView) {
             getWindow().setFlags(WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED, WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED);
         }
@@ -260,14 +274,16 @@ public class BaseMeetingActivity extends AppCompatActivity implements ZoomVideoS
         displayMetrics = new DisplayMetrics();
         display.getMetrics(displayMetrics);
 
+        Bundle bundle = getIntent().getExtras();
+
         initZoomSDK();
 
-        setupZoom();
+        setupZoom(bundle);
 
 
         session = ZoomVideoSDK.getInstance().getSession();
         ZoomVideoSDK.getInstance().addListener(BaseMeetingActivity.this);
-        parseIntent();
+        parseIntent(bundle);
         initView();
         initMeeting();
         updateSessionInfo();
@@ -276,21 +292,29 @@ public class BaseMeetingActivity extends AppCompatActivity implements ZoomVideoS
 
     }
 
-    public void setupZoom()
+    public void setupZoom(Bundle bundle)
     {
+        String sessionName = "",name = "",password = "",tokens = "";
+        if (null != bundle) {
+            name = bundle.getString("name");
+            password = bundle.getString("password");
+            sessionName = bundle.getString("sessionName");
+            tokens = bundle.getString("tokens");
+        }
 
-        String tokens = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfa2V5IjoiSFRvZVBWVkhSbmhONEV5dmQxc3Q3RmJyN1hJZkJLc08xQmEzIiwidHBjIjoiTVkgVEFzayBhbmRyb2lkIiwic2Vzc2lvbl9rZXkiOiI4MDEyNmEwNS0zZDQ4LTRlODQtOTA0YS0zZTI3NzZjZmZhN2UiLCJ1c2VyX2lkZW50aXR5IjoiOTc2OTcxNTU1OSIsInJvbGVfdHlwZSI6MSwiaWF0IjoxNjgzNDczOTQ5LCJleHAiOjE2ODM0ODExNDksImFwcEtleSI6IkhUb2VQVlZIUm5oTjRFeXZkMXN0N0ZicjdYSWZCS3NPMUJhMyIsInRva2VuRXhwIjoxNjgzNDgxMTQ5LCJwd2QiOiIxNzU3MDUyNCIsImNsb3VkX3JlY29yZGluZ19vcHRpb24iOjB9.YvTZU4_4KiT5aWvX_al_JSDE_oIMAUBx4I2UrIaOyGc";
+       // String tokens = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfa2V5IjoiSFRvZVBWVkhSbmhONEV5dmQxc3Q3RmJyN1hJZkJLc08xQmEzIiwidHBjIjoiTVkgVEFzayBhbmRyb2lkIiwic2Vzc2lvbl9rZXkiOiI4MDEyNmEwNS0zZDQ4LTRlODQtOTA0YS0zZTI3NzZjZmZhN2UiLCJ1c2VyX2lkZW50aXR5IjoiOTc2OTcxNTU1OSIsInJvbGVfdHlwZSI6MSwiaWF0IjoxNjgzNDczOTQ5LCJleHAiOjE2ODM0ODExNDksImFwcEtleSI6IkhUb2VQVlZIUm5oTjRFeXZkMXN0N0ZicjdYSWZCS3NPMUJhMyIsInRva2VuRXhwIjoxNjgzNDgxMTQ5LCJwd2QiOiIxNzU3MDUyNCIsImNsb3VkX3JlY29yZGluZ19vcHRpb24iOjB9.YvTZU4_4KiT5aWvX_al_JSDE_oIMAUBx4I2UrIaOyGc";
        /* myDisplayName = "9769715559";
         meetingPwd = "17570524";
         sessionName = "MY TAsk android";
         renderType = 0;*/
 
-        String sessionName = "MY TAsk android";//joinMeetingResponse.getTask().getTitle();
+       // String sessionName = "MY TAsk android";//joinMeetingResponse.getTask().getTitle();
         //UserDetails userDetails = PreferenceHandler.getInstance().readUserDetails();
-        String name = "9769715559";//userDetails.getUserName();
+      //  String name = "9769715559";//userDetails.getUserName();
         //AdditionalInfo additionalInfo = joinMeetingResponse.getMeeting().getAdditionalInfo();
-        String password = "17570524";//additionalInfo.getPassword();
+      //  String password = "17570524";//additionalInfo.getPassword();
         String token =  tokens;//additionalInfo.getSignature();
+
 
         ZoomVideoSDKAudioOption audioOption = new ZoomVideoSDKAudioOption();
         audioOption.connect = true;
@@ -302,10 +326,10 @@ public class BaseMeetingActivity extends AppCompatActivity implements ZoomVideoS
         ZoomVideoSDKSessionContext sessionContext = new ZoomVideoSDKSessionContext();
         sessionContext.audioOption = audioOption;
         sessionContext.videoOption = videoOption;
-        sessionContext.sessionName = sessionName;
-        sessionContext.userName = name;
-        sessionContext.token = token;
-        sessionContext.sessionPassword = password;
+        sessionContext.sessionName = "Arul New Meeting"/*sessionName*/;
+        sessionContext.userName = "7597371013"/*name*/;
+        sessionContext.token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfa2V5IjoiSFRvZVBWVkhSbmhONEV5dmQxc3Q3RmJyN1hJZkJLc08xQmEzIiwidHBjIjoiQXJ1bCBOZXcgTWVldGluZyIsInNlc3Npb25fa2V5IjoiY2ExODIzZmQtNTZiOS00MThjLWFjNjQtZDYyZTU1MDJhYWE0IiwidXNlcl9pZGVudGl0eSI6Ijc1OTczNzEwMTMiLCJyb2xlX3R5cGUiOjEsImlhdCI6MTY4ODExOTU5NSwiZXhwIjoxNjg4MTI2Nzk1LCJhcHBLZXkiOiJIVG9lUFZWSFJuaE40RXl2ZDFzdDdGYnI3WElmQktzTzFCYTMiLCJ0b2tlbkV4cCI6MTY4ODEyNjc5NSwicHdkIjoiNDg1OTAwMTIiLCJjbG91ZF9yZWNvcmRpbmdfb3B0aW9uIjowfQ.quR6G-VRGa8--43r-uUdbLEvRigX2TQ_iI5VgN9ld60"/*token*/;
+        sessionContext.sessionPassword = "48590012"/*password*/;
         sessionContext.sessionIdleTimeoutMins = 40;
 
         ZoomVideoSDKSession session = ZoomVideoSDK.getInstance().joinSession(sessionContext);
@@ -340,7 +364,8 @@ public class BaseMeetingActivity extends AppCompatActivity implements ZoomVideoS
     @Override
     protected void onNewIntent(Intent intent) {
         super.onNewIntent(intent);
-        parseIntent();
+        Bundle bundle = intent.getExtras();
+        parseIntent(bundle);
     }
 
     @Override
@@ -358,18 +383,22 @@ public class BaseMeetingActivity extends AppCompatActivity implements ZoomVideoS
         Log.d(TAG, "onStop");
     }
 
-    protected void parseIntent() {
-        Bundle bundle = getIntent().getExtras();
-       /* if (null != bundle) {
+    protected void parseIntent(Bundle bundle) {
+        //Bundle bundle = getIntent().getExtras();
+        /*if (null != bundle) {
             myDisplayName = bundle.getString("name");
             meetingPwd = bundle.getString("password");
             sessionName = bundle.getString("sessionName");
             renderType = bundle.getInt("render_type", RENDER_TYPE_ZOOMRENDERER);
         }*/
-        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfa2V5IjoiSFRvZVBWVkhSbmhONEV5dmQxc3Q3RmJyN1hJZkJLc08xQmEzIiwidHBjIjoiTVkgVEFzayBhbmRyb2lkIiwic2Vzc2lvbl9rZXkiOiI4MDEyNmEwNS0zZDQ4LTRlODQtOTA0YS0zZTI3NzZjZmZhN2UiLCJ1c2VyX2lkZW50aXR5IjoiOTc2OTcxNTU1OSIsInJvbGVfdHlwZSI6MSwiaWF0IjoxNjgzMzkyOTI0LCJleHAiOjE2ODM0MDAxMjQsImFwcEtleSI6IkhUb2VQVlZIUm5oTjRFeXZkMXN0N0ZicjdYSWZCS3NPMUJhMyIsInRva2VuRXhwIjoxNjgzNDAwMTI0LCJwd2QiOiIxNzU3MDUyNCIsImNsb3VkX3JlY29yZGluZ19vcHRpb24iOjB9.xDmZrnTbsr4QAPLUpG595cQG60t-RJBOD2Ks02uo4Ww";
-        myDisplayName = "9769715559";
-        meetingPwd = "17570524";
-        sessionName = "MY TAsk android";
+
+       /* sessionContext.userName = "Arull"*//*name*//*;
+        sessionContext.token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfa2V5IjoiSFRvZVBWVkhSbmhONEV5dmQxc3Q3RmJyN1hJZkJLc08xQmEzIiwidHBjIjoiQXJ1bCBOZXcgTWVldGluZyIsInNlc3Npb25fa2V5IjoiY2ExODIzZmQtNTZiOS00MThjLWFjNjQtZDYyZTU1MDJhYWE0IiwidXNlcl9pZGVudGl0eSI6Ijk3Njk3MTU1NTkiLCJyb2xlX3R5cGUiOjEsImlhdCI6MTY4NzU5MjU4MSwiZXhwIjoxNjg3NTk5NzgxLCJhcHBLZXkiOiJIVG9lUFZWSFJuaE40RXl2ZDFzdDdGYnI3WElmQktzTzFCYTMiLCJ0b2tlbkV4cCI6MTY4NzU5OTc4MSwicHdkIjoiNDg1OTAwMTIiLCJjbG91ZF9yZWNvcmRpbmdfb3B0aW9uIjowfQ.UAqKbXnjnmD9lDP4u-PwVZoXiWRMMJ-2wRcQBLJ1EpI"*//*token*//*;
+        sessionContext.sessionPassword = "48590012"*//*password*//*;*/
+        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfa2V5IjoiSFRvZVBWVkhSbmhONEV5dmQxc3Q3RmJyN1hJZkJLc08xQmEzIiwidHBjIjoiQXJ1bCBOZXcgTWVldGluZyIsInNlc3Npb25fa2V5IjoiY2ExODIzZmQtNTZiOS00MThjLWFjNjQtZDYyZTU1MDJhYWE0IiwidXNlcl9pZGVudGl0eSI6Ijc1OTczNzEwMTMiLCJyb2xlX3R5cGUiOjEsImlhdCI6MTY4ODExOTU5NSwiZXhwIjoxNjg4MTI2Nzk1LCJhcHBLZXkiOiJIVG9lUFZWSFJuaE40RXl2ZDFzdDdGYnI3WElmQktzTzFCYTMiLCJ0b2tlbkV4cCI6MTY4ODEyNjc5NSwicHdkIjoiNDg1OTAwMTIiLCJjbG91ZF9yZWNvcmRpbmdfb3B0aW9uIjowfQ.quR6G-VRGa8--43r-uUdbLEvRigX2TQ_iI5VgN9ld60";
+        myDisplayName = "7597371013";
+        meetingPwd = "48590012";
+        sessionName = "Arul New Meeting";
         renderType = 0;
     }
 
@@ -597,14 +626,20 @@ public class BaseMeetingActivity extends AppCompatActivity implements ZoomVideoS
         if (null == shareToolbar) {
             shareToolbar = new ShareToolbar(this,this);
         }
-        if (Build.VERSION.SDK_INT >= 29) {
+
+        EventBus.getDefault().post(new CartEvent("new Cart Item"));
+
+        /*if (Build.VERSION.SDK_INT >= 29) {
             //MediaProjection  need service with foregroundServiceType mediaProjection in android Q
             boolean hasForegroundNotification = NotificationMgr.hasNotification(NotificationMgr.PT_NOTICICATION_ID);
             if (!hasForegroundNotification) {
-                Intent intent = new Intent(this, NotificationService.class);
-                startForegroundService(intent);
+
+                EventBus.getDefault().post(new CartEvent("new Cart Item"));
+
+                *//*Intent intent = new Intent(this, NotificationService.class);
+                startForegroundService(intent);*//*
             }
-        }
+        }*/
         int ret = ZoomVideoSDK.getInstance().getShareHelper().startShareScreen(data);
         if (ret == ZoomVideoSDKErrors.Errors_Success) {
             shareToolbar.showToolbar();
@@ -717,7 +752,7 @@ public class BaseMeetingActivity extends AppCompatActivity implements ZoomVideoS
         chatListView.setAdapter(chatMsgAdapter);
 
         keyBoardLayout.setKeyBoardListener(this);
-        actionBar = findViewById(R.id.action_bar);
+        actionBar = findViewById(R.id.mera_layout);
 
         iconLock = findViewById(R.id.meeting_lock_status);
 
@@ -952,6 +987,9 @@ public class BaseMeetingActivity extends AppCompatActivity implements ZoomVideoS
     }
 
     public void onClickAudio(View view) {
+
+       // EventBus.getDefault().post(new CartEvent("new Cart Item audio"));
+
         ZoomVideoSDKUser zoomSDKUserInfo = session.getMySelf();
         if (null == zoomSDKUserInfo)
             return;
@@ -1394,12 +1432,15 @@ public class BaseMeetingActivity extends AppCompatActivity implements ZoomVideoS
         if (null == zoomSDKUserInfo)
             return;
         // SET THIS TO VISIBLE FOR SHOWING MORE BUTTON IN SIDE RIBBON
-        iconMore.setVisibility(View.GONE);
+        iconMore.setVisibility(View.VISIBLE);
     }
+
 
     private boolean canSwitchAudioSource() {
         return ZoomVideoSDK.getInstance().getAudioHelper().canSwitchSpeaker();
+
     }
+
 
     private boolean canStartRecord() {
         return ZoomVideoSDK.getInstance().getRecordingHelper().canStartRecording() == ZoomVideoSDKErrors.Errors_Success;
@@ -1710,6 +1751,9 @@ public class BaseMeetingActivity extends AppCompatActivity implements ZoomVideoS
 
     @Override
     public void onUserAudioStatusChanged(ZoomVideoSDKAudioHelper audioHelper, List<ZoomVideoSDKUser> userList) {
+       // Toast.makeText(this, "" + userList.size(), Toast.LENGTH_SHORT).show();
+
+
         ZoomVideoSDKUser zoomSDKUserInfo = session.getMySelf();
         if (zoomSDKUserInfo != null && userList.contains(zoomSDKUserInfo)) {
             if (zoomSDKUserInfo.getAudioStatus().getAudioType() == ZoomVideoSDKAudioStatus.ZoomVideoSDKAudioType.ZoomVideoSDKAudioType_None) {
@@ -1723,6 +1767,26 @@ public class BaseMeetingActivity extends AppCompatActivity implements ZoomVideoS
             }
             checkMoreAction();
         }
+
+        if (isVisitFirstTime)
+        {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    isVisitFirstTime = false;
+                    adapter.onUserMuteUnmuteChanged(userList,userVideoList);
+                }
+            }, 3000);
+        }
+        else
+        {
+            adapter.onUserMuteUnmuteChanged(userList,userVideoList);
+        }
+
+
+
+
+
     }
 
     @Override
@@ -1741,6 +1805,7 @@ public class BaseMeetingActivity extends AppCompatActivity implements ZoomVideoS
             }
         }
     }
+
 
     @Override
     public void onLiveStreamStatusChanged(ZoomVideoSDKLiveStreamHelper liveStreamHelper, ZoomVideoSDKLiveStreamStatus status) {
@@ -1939,5 +2004,8 @@ public class BaseMeetingActivity extends AppCompatActivity implements ZoomVideoS
     public void onUserVideoNetworkStatusChanged(ZoomVideoSDKNetworkStatus status, ZoomVideoSDKUser user) {
         Log.d(TAG, "onUserVideoNetworkStatusChanged:" + user.getUserName() + ":" + status);
     }
+
+
+
 }
 
