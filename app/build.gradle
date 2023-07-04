@@ -1,5 +1,5 @@
 plugins {
-  id  'com.android.application'//'com.android.application'//'com.android.library'//    id
+  id  'com.android.library'//'com.android.application'//'com.android.library'//    id
 } //
 
 android {
@@ -7,7 +7,7 @@ android {
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.zoomlibtry"
+       // applicationId "com.example.zoomlibtry"
         minSdk 23 // Changing this to 23 becuase the subk pay app is 23
         targetSdk 33
         versionCode 1

@@ -326,10 +326,10 @@ public class BaseMeetingActivity extends AppCompatActivity implements ZoomVideoS
         ZoomVideoSDKSessionContext sessionContext = new ZoomVideoSDKSessionContext();
         sessionContext.audioOption = audioOption;
         sessionContext.videoOption = videoOption;
-        sessionContext.sessionName = "Arul New Meeting"/*sessionName*/;
-        sessionContext.userName = "7597371013"/*name*/;
-        sessionContext.token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfa2V5IjoiSFRvZVBWVkhSbmhONEV5dmQxc3Q3RmJyN1hJZkJLc08xQmEzIiwidHBjIjoiQXJ1bCBOZXcgTWVldGluZyIsInNlc3Npb25fa2V5IjoiY2ExODIzZmQtNTZiOS00MThjLWFjNjQtZDYyZTU1MDJhYWE0IiwidXNlcl9pZGVudGl0eSI6Ijc1OTczNzEwMTMiLCJyb2xlX3R5cGUiOjEsImlhdCI6MTY4ODExOTU5NSwiZXhwIjoxNjg4MTI2Nzk1LCJhcHBLZXkiOiJIVG9lUFZWSFJuaE40RXl2ZDFzdDdGYnI3WElmQktzTzFCYTMiLCJ0b2tlbkV4cCI6MTY4ODEyNjc5NSwicHdkIjoiNDg1OTAwMTIiLCJjbG91ZF9yZWNvcmRpbmdfb3B0aW9uIjowfQ.quR6G-VRGa8--43r-uUdbLEvRigX2TQ_iI5VgN9ld60"/*token*/;
-        sessionContext.sessionPassword = "48590012"/*password*/;
+        sessionContext.sessionName = /*"Latest Meetign Arul"*/sessionName;
+        sessionContext.userName = /*"7597371013"*/name;
+        sessionContext.token = /*"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfa2V5IjoiSFRvZVBWVkhSbmhONEV5dmQxc3Q3RmJyN1hJZkJLc08xQmEzIiwidHBjIjoiTGF0ZXN0IE1lZXRpZ24gQXJ1bCIsInNlc3Npb25fa2V5IjoiODQ1MzhlODAtYjRkZC00MWY4LWI1YzUtM2JmYTZlMWMwNjRhIiwidXNlcl9pZGVudGl0eSI6Ijc1OTczNzEwMTMiLCJyb2xlX3R5cGUiOjEsImlhdCI6MTY4ODQ3MDg3NywiZXhwIjoxNjg4NDc4MDc3LCJhcHBLZXkiOiJIVG9lUFZWSFJuaE40RXl2ZDFzdDdGYnI3WElmQktzTzFCYTMiLCJ0b2tlbkV4cCI6MTY4ODQ3ODA3NywicHdkIjoiNDEwODA5NDUiLCJjbG91ZF9yZWNvcmRpbmdfb3B0aW9uIjowfQ.htwJBF77m-jiUtMoSv2bjSV2UkXE_msI8l2XwyEmBsc"*/token;
+        sessionContext.sessionPassword = /*"41080945"*/password;
         sessionContext.sessionIdleTimeoutMins = 40;
 
         ZoomVideoSDKSession session = ZoomVideoSDK.getInstance().joinSession(sessionContext);
@@ -385,21 +385,21 @@ public class BaseMeetingActivity extends AppCompatActivity implements ZoomVideoS
 
     protected void parseIntent(Bundle bundle) {
         //Bundle bundle = getIntent().getExtras();
-        /*if (null != bundle) {
+        if (null != bundle) {
             myDisplayName = bundle.getString("name");
             meetingPwd = bundle.getString("password");
             sessionName = bundle.getString("sessionName");
             renderType = bundle.getInt("render_type", RENDER_TYPE_ZOOMRENDERER);
-        }*/
+        }
 
        /* sessionContext.userName = "Arull"*//*name*//*;
         sessionContext.token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfa2V5IjoiSFRvZVBWVkhSbmhONEV5dmQxc3Q3RmJyN1hJZkJLc08xQmEzIiwidHBjIjoiQXJ1bCBOZXcgTWVldGluZyIsInNlc3Npb25fa2V5IjoiY2ExODIzZmQtNTZiOS00MThjLWFjNjQtZDYyZTU1MDJhYWE0IiwidXNlcl9pZGVudGl0eSI6Ijk3Njk3MTU1NTkiLCJyb2xlX3R5cGUiOjEsImlhdCI6MTY4NzU5MjU4MSwiZXhwIjoxNjg3NTk5NzgxLCJhcHBLZXkiOiJIVG9lUFZWSFJuaE40RXl2ZDFzdDdGYnI3WElmQktzTzFCYTMiLCJ0b2tlbkV4cCI6MTY4NzU5OTc4MSwicHdkIjoiNDg1OTAwMTIiLCJjbG91ZF9yZWNvcmRpbmdfb3B0aW9uIjowfQ.UAqKbXnjnmD9lDP4u-PwVZoXiWRMMJ-2wRcQBLJ1EpI"*//*token*//*;
         sessionContext.sessionPassword = "48590012"*//*password*//*;*/
-        String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfa2V5IjoiSFRvZVBWVkhSbmhONEV5dmQxc3Q3RmJyN1hJZkJLc08xQmEzIiwidHBjIjoiQXJ1bCBOZXcgTWVldGluZyIsInNlc3Npb25fa2V5IjoiY2ExODIzZmQtNTZiOS00MThjLWFjNjQtZDYyZTU1MDJhYWE0IiwidXNlcl9pZGVudGl0eSI6Ijc1OTczNzEwMTMiLCJyb2xlX3R5cGUiOjEsImlhdCI6MTY4ODExOTU5NSwiZXhwIjoxNjg4MTI2Nzk1LCJhcHBLZXkiOiJIVG9lUFZWSFJuaE40RXl2ZDFzdDdGYnI3WElmQktzTzFCYTMiLCJ0b2tlbkV4cCI6MTY4ODEyNjc5NSwicHdkIjoiNDg1OTAwMTIiLCJjbG91ZF9yZWNvcmRpbmdfb3B0aW9uIjowfQ.quR6G-VRGa8--43r-uUdbLEvRigX2TQ_iI5VgN9ld60";
+       /* String token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfa2V5IjoiSFRvZVBWVkhSbmhONEV5dmQxc3Q3RmJyN1hJZkJLc08xQmEzIiwidHBjIjoiTGF0ZXN0IE1lZXRpZ24gQXJ1bCIsInNlc3Npb25fa2V5IjoiODQ1MzhlODAtYjRkZC00MWY4LWI1YzUtM2JmYTZlMWMwNjRhIiwidXNlcl9pZGVudGl0eSI6Ijc1OTczNzEwMTMiLCJyb2xlX3R5cGUiOjEsImlhdCI6MTY4ODQ3MDg3NywiZXhwIjoxNjg4NDc4MDc3LCJhcHBLZXkiOiJIVG9lUFZWSFJuaE40RXl2ZDFzdDdGYnI3WElmQktzTzFCYTMiLCJ0b2tlbkV4cCI6MTY4ODQ3ODA3NywicHdkIjoiNDEwODA5NDUiLCJjbG91ZF9yZWNvcmRpbmdfb3B0aW9uIjowfQ.htwJBF77m-jiUtMoSv2bjSV2UkXE_msI8l2XwyEmBsc";
         myDisplayName = "7597371013";
-        meetingPwd = "48590012";
-        sessionName = "Arul New Meeting";
-        renderType = 0;
+        meetingPwd = "41080945";
+        sessionName = "Latest Meetign Arul";
+        renderType = 0;*/
     }
 
     @Override
@@ -1432,7 +1432,7 @@ public class BaseMeetingActivity extends AppCompatActivity implements ZoomVideoS
         if (null == zoomSDKUserInfo)
             return;
         // SET THIS TO VISIBLE FOR SHOWING MORE BUTTON IN SIDE RIBBON
-        iconMore.setVisibility(View.VISIBLE);
+        iconMore.setVisibility(View.GONE);
     }
 
 
@@ -1752,7 +1752,6 @@ public class BaseMeetingActivity extends AppCompatActivity implements ZoomVideoS
     @Override
     public void onUserAudioStatusChanged(ZoomVideoSDKAudioHelper audioHelper, List<ZoomVideoSDKUser> userList) {
        // Toast.makeText(this, "" + userList.size(), Toast.LENGTH_SHORT).show();
-
 
         ZoomVideoSDKUser zoomSDKUserInfo = session.getMySelf();
         if (zoomSDKUserInfo != null && userList.contains(zoomSDKUserInfo)) {
